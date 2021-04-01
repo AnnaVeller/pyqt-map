@@ -55,12 +55,15 @@ ApplicationWindow {
         //                    onClicked: routeModel.editRoute(index, name, age+1)
         //                }
                         Button{
+                            id: changeBut
                             width: 40
                             height: 40
                             anchors.verticalCenter: parent.verticalCenter
                             text: "*"
                             onClicked: {
                                 root.openMap()
+                                listExample.enabled = false
+//                                delBut.enabled = false
                             }
                             background: Rectangle {
                                 color: "lightblue"
@@ -68,6 +71,7 @@ ApplicationWindow {
                             }
                         }
                         Button{
+                            id: delBut
                             width: 40
                             height: 40
                             anchors.verticalCenter: parent.verticalCenter
@@ -128,5 +132,11 @@ ApplicationWindow {
     function openMap() {
         var Component = Qt.createComponent("MyMap.qml")
         var item = Component.createObject(root)
+        item.closing.connect(enebledBut)
+    }
+    function enebledBut() {
+        listExample.enabled = true
+//        delBut.enabled = true
+        console.log("Закрыли карту")
     }
 }
