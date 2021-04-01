@@ -38,9 +38,9 @@ if __name__ == "__main__":
     engine.rootContext().setContextProperty('routeModel', model)
 
     engine.load(qml_doc_path)
-    qml_root = engine.rootObjects()[0]
+#    qml_root = engine.rootObjects()[0]
 
-    qml_root.clicked.connect(on_qml_mouse_clicked)
+#    qml_root.clicked.connect(on_qml_mouse_clicked)
 
     sys.exit(app.exec_())
 #    del db

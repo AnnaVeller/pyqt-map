@@ -13,204 +13,120 @@ ApplicationWindow {
     id: root
     visible: true
     width: 800
-    height: 382
-    minimumWidth: 400
+    height: 400
+    minimumWidth: 600
     minimumHeight: 200
-    property int xPos
-    property int yPos
-    property int click_xPos: 0
-    property int click_yPos: 0
-    property int mynumber: 3
-    signal clicked(int xx, int yy)
-    Rectangle {
-        id: mapRect
-        anchors.left: parent.left
-        width: parent.width-450
-        height: parent.height
 
-        Plugin {
-            id: mapPlugin
-            name: /*"osm"*/ "mapboxgl"/*, "esri", ...*/
-            // specify plugin parameters if necessary
-            // PluginParameter {
-            //     name:
-            //     value:
-            // }
-        }
-
-
-
-        Map {
-            anchors.fill: parent
-            plugin: mapPlugin
-            center: QtPositioning.coordinate(55.75222, 37.61556) // координаты Москвы
-            zoomLevel:10
-        }
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.RightButton
-            hoverEnabled: true
-            onPositionChanged: {
-                xPos=mouse.x
-                yPos=mouse.y
-            }
-            onClicked: {
-                root.clicked(mouse.x, mouse.y)  // emit the parent's signal
-                click_xPos=mouse.x
-                click_yPos=mouse.y
-            }
-        }
-    }
     Rectangle {
         id: rect
-        anchors.left: mapRect.right
-        width: 450
-        height: parent.height
-        color: "lightgrey"
+        anchors.fill: parent
+        color: "oldlace"
 
         ListView {
             id: listExample
             anchors.right: parent.right
             width: rect.width
-            height: rect.height-25
+            height: rect.height
+            spacing: 5
 
             model: routeModel
             delegate:
-                Item {
-                width: rect.width
-                height: 60
-                Row {
-                    Text {
-                        width: rect.width-20
-                        text: "ID:" + route_id + " NAME: " + name + " DATE: " + date + " AMOUNT: " + amount
-                        horizontalAlignment: Text.AlignHCenter
-                        anchors.verticalCenter: parent.verticalCenter
+                Rectangle {
+                    width: rect.width
+                    height: 60
+                    color: "linen"
+                    border.color: "pink"
+                    Row {
+                        width: parent.width - 6
+                        height: 60
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 3
+                        Text {
+                            width: parent.width-86
+                            anchors.verticalCenter: parent.verticalCenter
+//                            anchors.horizontalCenter: parent.horizontalCenter
+                            height: 18
+                            text: "ID:" + route_id + " NAME: " + name + " DATE: " + date + " AMOUNT: " + amount
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+        //                Button{
+        //                    width: 20
+        //                    text: "+"
+        //                    onClicked: routeModel.editRoute(index, name, age+1)
+        //                }
+                        Button{
+                            width: 40
+                            height: 40
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "*"
+                            onClicked: {
+                                root.openMap()
+                            }
+                            background: Rectangle {
+                                color: "lightblue"
+                                radius: 4
+                            }
+                        }
+                        Button{
+                            width: 40
+                            height: 40
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "X"
+                            onClicked: routeModel.deleteRoute(index)
+                            background: Rectangle {
+                                color: "tomato"
+                                radius: 4
+                            }
+                        }
                     }
-    //                Button{
-    //                    width: 20
-    //                    text: "+"
-    //                    onClicked: routeModel.editRoute(index, name, age+1)
-    //                }
-    //                Button{
-    //                    width: 20
-    //                    text: "-"
-    //                    onClicked: routeModel.editRoute(index, name, age-1)
-    //                }
-                    Button{
-                        width: 20
-                        text: "X"
-                        onClicked: routeModel.deleteRoute(index)
+                }
+        }
+        Rectangle {
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: 30
+            width: 350
+            radius: 4
+            border.color: "gray"
+            color: "lightgray"
+            Row {
+                width: parent.width - 6
+                height: 30
+                spacing: 3
+                anchors.horizontalCenter: parent.horizontalCenter
+                Text {
+                    text: "Введите имя: "
+                    height: 15
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                TextField{
+                    id: nameField
+                    width: 170
+                    height: 25
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                Button {
+                    id: but
+                    width: 80
+                    height: 25
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Добавить"
+                    onClicked: {
+
+                        console.log("Кнопка add была нажата, имя:",nameField.text)
+                        routeModel.insertRoute(nameField.text)
+                    }
+                    background: Rectangle {
+                        color: "darkseagreen"
+                        radius: 4
                     }
                 }
             }
         }
-        Text {
-            text: "Введите имя: "
-            anchors.right: nameField.left
-            anchors.bottom: parent.bottom
-            height: 25
-        }
+    }
 
-
-        TextField{
-            id: nameField
-            width: 150
-            height: 25
-            anchors.right: but.left
-            anchors.bottom: parent.bottom
-        }
-
-        Button {
-            id: but
-            width: 50
-            height: 25
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            text: "add"
-            onClicked: {
-
-                console.log("Кнопка add была нажата, имя:",nameField.text)
-                routeModel.insertRoute(nameField.text)
-            }
-        }
+    function openMap() {
+        var Component = Qt.createComponent("MyMap.qml")
+        var item = Component.createObject(root)
     }
-//    Button {
-//        id: countBut
-//        height: 30
-//        width: iii.width
-//        anchors.top: iii.bottom
-//        anchors.left: mapRect.right
-//        text: qsTr("count")
-
-//        onClicked: {
-//            // Вызываем слот калькулятора, чтобы вычесть числа
-//            db.count()
-//        }
-//    }
-
-//    Image {
-//        id: rec
-//        source: "map.jpg"
-//        width: parent.width
-//        height: parent.height
-//    }
-    Text {
-        id: xName
-        text: 'x='
-    }
-    Text {
-        id: yName
-        anchors.top: xName.bottom
-        text: 'y='
-    }
-    Text {
-        id: x
-        anchors.left: xName.right
-        text: xPos
-    }
-    Text {
-        id: y
-        anchors.left: yName.right
-        anchors.top: x.bottom
-        text: yPos
-    }
-    Text {
-        id: click_xName
-        anchors.top: yName.bottom
-        text: 'clicked x='
-    }
-    Text {
-        id: click_yName
-        anchors.top: click_xName.bottom
-        text: 'clicked y='
-    }
-    Text {
-        id: click_x
-        anchors.left: click_xName.right
-        anchors.top: y.bottom
-        text: click_xPos
-    }
-    Text {
-        id: click_y
-        anchors.left: click_yName.right
-        anchors.top: click_x.bottom
-        text: click_yPos
-    }
-//    Text {
-//       anchors.top: click_y.bottom
-//       id: countOfRoutes
-//       text: mynumber
-//   }
-    // Здесь забираем результат сложения или вычитания чисел
-//    Connections {
-//        target: db
-
-//        // Обработчик сигнала сложения
-//        onCountOfRoutes: {
-//            // sum было задано через arguments=['sum']
-////            countOfRoutes.text = count
-//            mynumber = count
-//        }
-
-//    }
 }
