@@ -16,7 +16,66 @@ Window {
     property int click_xPos: 0
     property int click_yPos: 0
     property int mynumber: 3
+
+    property var myMarkers: []
+
     signal clicked(int xx, int yy)
+
+    property int thisRouteID: 0
+    property int thisIndexFromView: 0
+
+    function addMarker(latitude, longitude, pointNumber, fromBD)
+    {
+        var Component = Qt.createComponent("MyMarker.qml")
+        var item = Component.createObject(mapRect, {coordinate: QtPositioning.coordinate(latitude, longitude)})
+
+        item.lat = latitude
+        item.lon = longitude
+        item.num = pointNumber
+        item.route_id = thisRouteID
+        item.thisIndexFromView = thisIndexFromView
+
+        function finallyDelete(lat, lon, other_num) {
+            console.log('3 этап удаления')
+            routeline.removeCoordinate(QtPositioning.coordinate(lat, lon))
+
+            console.log('удалили: ', other_num)
+
+//            for (var i = 0; i < myMarkers.length; i++) {
+//                if (myMarkers[i].num === other_num) {
+////                    myMarkers[i].destroy()
+//                    delete myMarkers[i]
+//                }
+//            }
+
+            for (var i = 0; i < myMarkers.length; i++) {
+                console.log("myMarkers: i=", i, "myMarkers.num=", myMarkers[i].num)
+                if (myMarkers[i].num > other_num) {
+                    myMarkers[i].num = myMarkers[i].num - 1
+                    console.log("myMarkers: i=", i, "myMarkers.num=", myMarkers[i].num)
+                }
+            }
+        }
+        item.delThisPoint.connect(finallyDelete)
+        myMarkers.push(item)
+
+        map.addMapItem(item)                                                   // (добавили метку на карту)
+        console.log("add fucking marker")
+        routeline.addCoordinate(QtPositioning.coordinate(latitude, longitude)) // (добавили линию)
+
+        if (fromBD === false)
+        {
+            console.log("Добавили новую метку через интерфейс (сейчас запишем в БД)")
+            dbManager.add_point(pointNumber, latitude, longitude, thisRouteID)
+            dbManager.updateAmountInRoutes(thisRouteID, pointNumber)
+            routeModel.editAmountRouteInModel(thisIndexFromView, pointNumber)
+        }
+
+
+        routeModel.justPrint(thisRouteID)
+        dbManager.justPrint(thisRouteID)
+    }
+
     Rectangle {
         id: mapRect
         anchors.fill: parent
@@ -24,25 +83,6 @@ Window {
         Plugin {
             id: mapPlugin
             name: /*"osm"*/ "mapboxgl"/*, "esri", ...*/
-        }
-
-        function addMarker(latitude, longitude)
-        {
-            var Component = Qt.createComponent("MyMarker.qml")
-            var item = Component.createObject(mapRect, {coordinate: QtPositioning.coordinate(latitude, longitude)})
-
-            item.lat = latitude
-            item.lon = longitude
-
-            item.delThisPoint.connect(finallyDelete)
-            function finallyDelete(lat, lon) {
-                routeline.removeCoordinate(QtPositioning.coordinate(lat, lon))
-                console.log('удалили?')
-            }
-
-            map.addMapItem(item)
-            console.log("add fucking marker")
-            routeline.addCoordinate(QtPositioning.coordinate(latitude, longitude))
         }
 
         Map {
@@ -71,7 +111,7 @@ Window {
             onClicked: {
                 console.log('latitude = '+ (map.toCoordinate(Qt.point(mouse.x,mouse.y)).latitude),
                                                    'longitude = '+ (map.toCoordinate(Qt.point(mouse.x,mouse.y)).longitude));
-                mapRect.addMarker(map.toCoordinate(Qt.point(mouse.x,mouse.y)).latitude, map.toCoordinate(Qt.point(mouse.x,mouse.y)).longitude)
+                root.addMarker(map.toCoordinate(Qt.point(mouse.x,mouse.y)).latitude, map.toCoordinate(Qt.point(mouse.x,mouse.y)).longitude, dbManager.getAmountOfPoints(thisRouteID)+1, false)
 //                root.clicked(mouse.x, mouse.y)  // emit the parent's signal
                 click_xPos=mouse.x
                 click_yPos=mouse.y

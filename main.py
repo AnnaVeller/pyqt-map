@@ -36,6 +36,7 @@ if __name__ == "__main__":
     db = dbManager(SqliteDatabase('resources.db'))
     model = RouteModel(db)
     engine.rootContext().setContextProperty('routeModel', model)
+    engine.rootContext().setContextProperty('dbManager', db)
 
     engine.load(qml_doc_path)
 #    qml_root = engine.rootObjects()[0]
