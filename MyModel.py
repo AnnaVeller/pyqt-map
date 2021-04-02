@@ -52,15 +52,34 @@ class RouteModel(QAbstractListModel):
             print(str)
         self.endInsertRows()
 
-    @pyqtSlot(int, str, int)
-    def editRoute(self, row, name, age):
+    @pyqtSlot(int, str)
+    def editNameRouteInModel(self, row, n):
         ix = self.index(row, 0)
-        self.routes[row] = {'name': name, 'age': age}
+        self.routes[row]["name"] = n
         self.dataChanged.emit(ix, ix, self.roleNames())
+
+    @pyqtSlot(int, int)
+    def editAmountRouteInModel(self, row, am):
+        ix = self.index(row, 0)
+        self.routes[row]["amount"] = am
+        self.dataChanged.emit(ix, ix, self.roleNames())
+        print("editAmountRouteInModel")
 
     @pyqtSlot(int)
     def deleteRoute(self, row):
         self.beginRemoveColumns(QModelIndex(), row, row)
         self.dbManager.remove_route(self.routes[row]["route_id"])
+        self.dbManager
         del self.routes[row]
         self.endRemoveRows()
+
+    @pyqtSlot(int)
+    def justPrint(self, smth):                      #                                 <-- для проверки связи qml и python
+        print("[routeModel] checkConnection:", smth)
+
+    @pyqtSlot(str, result=bool)
+    def isUniqueName(self, n):
+        for r in self.routes:
+            if (r["name"] == n):
+                return False
+        return True

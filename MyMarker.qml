@@ -7,7 +7,11 @@ MapQuickItem{
     id: marker
     property real lat: 0
     property real lon: 0
-    signal delThisPoint(real lat, real lon)
+    property int num: 0
+    property int route_id: 0
+    property int thisIndexFromView: 0
+    signal delThisPoint(real lat, real lon, int n)
+
     anchorPoint.x: marker.width / 4 + 10
     anchorPoint.y: marker.height - 2
     sourceItem: Image{
@@ -24,19 +28,20 @@ MapQuickItem{
                 var popup = popupComponent.createObject(marker)
                 popup.lat = lat
                 popup.lon = lon
-                popup.delThis.connect(almostDel)
-                function almostDel(lat, lon) {
-                    delThisPoint(lat, lon)
+                popup.num = num
+                popup.route_id = route_id
+                popup.thisIndexFromView = thisIndexFromView
+                function almostDel(lat, lon, n) {
+                    console.log('2 этап удаления')
+                    delThisPoint(lat, lon, n)
                     marker.enabled = false
                     marker.visible = false
                     popup.close()
                 }
+                popup.delThis.connect(almostDel)
 
                 popup.open()
             }
-//            onExited: {
-//                console.log("Exited")
-//            }
         }
     }
 

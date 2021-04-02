@@ -39,21 +39,26 @@ class dbManager(QObject):
         self.database.close()
         print ('деструктор dbManager вызван')
 
-#    def add_route(self, r_id, n, d, am):
-#        Routes.create(route_id = r_id, name = n, date_of_creation = d, amount = am)
     def add_route(self, n, d, am):
         Routes.create(name = n, date_of_creation = d, amount = am)
 
     def remove_route(self, r_id):
+        sql = "DELETE FROM points WHERE route_id=?"
+        self.database.execute_sql(sql, (r_id,))
         sql = "DELETE FROM routes WHERE route_id=?"
         self.database.execute_sql(sql, (r_id,))
 
+    @pyqtSlot(int, float, float, int)
     def add_point(self, num, lat, lon, r_id):
         Points.create(number = num, latitude = lat, longitude = lon, route = r_id)
 
+    @pyqtSlot(int, int)
     def remove_point(self, r_id, num):
         sql = "DELETE FROM points WHERE route_id=? AND number=?"
         self.database.execute_sql(sql, (r_id, num))
+        query = Points.update(number = Points.number-1).where(Points.number > num, Points.route == r_id)
+        query.execute()
+        print("remove_point")
 
     def get_routes(self):
         all_routes = Routes.select()
@@ -77,3 +82,43 @@ class dbManager(QObject):
 #        count_of_routes = Routes.select().count()
         return Routes.select().count()
 #        self.countOfRoutes.emit(Routes.select().count())
+
+    @pyqtSlot(int)
+    def justPrint(self, smth):                      #                                 <-- для проверки связи qml и python
+        print("[dbManager] checkConnection:", smth)
+
+    @pyqtSlot(int, result=int)
+    def getAmountOfPoints(self, r_id):
+        ps = Routes.select().where(Routes.route_id == r_id)
+        for p in ps:
+            return p.amount
+
+    @pyqtSlot(int, int, result=float)
+    def getLatFromRouteByNumber(self, r_id, num):
+        ps = Points.select().where(Points.route_id == r_id, Points.number == num)
+        for p in ps:
+            return p.latitude
+
+    @pyqtSlot(int, int, result=float)
+    def getLonFromRouteByNumber(self, r_id, num):
+        ps = Points.select().where(Points.route_id == r_id, Points.number == num)
+        for p in ps:
+            return p.longitude
+
+    @pyqtSlot(int, int)
+    def updateAmountInRoutes(self, r_id, am):
+        query = Routes.update(amount = am).where(Routes.route_id == r_id)
+        query.execute()
+        print("updateAmountInRoutes")
+
+    @pyqtSlot(int, result=str)
+    def getRouteName(self, r_id):
+        ps = Routes.select().where(Routes.route_id == r_id)
+        for p in ps:
+            return p.name
+
+    @pyqtSlot(int, str)
+    def updateRouteName(self, r_id, n):
+        query = Routes.update(name = n).where(Routes.route_id == r_id)
+        query.execute()
+        print("updateRouteName")
