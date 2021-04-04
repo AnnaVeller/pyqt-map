@@ -67,7 +67,6 @@ Popup {
                 dbManager.updateAmountInRoutes(route_id, new_amount_of_points)               // уменьшаем на 1 кол-во точек в маршруте в БД
                 routeModel.editAmountRouteInModel(thisIndexFromView, new_amount_of_points)   // уменьшаем на 1 кол-во точек в маршруте в ListView
                 dbManager.remove_point(route_id, num)
-                console.log('1 этап удаления')
                 delThis(lat, lon, num)  // для удаления из ListView
 //                info0.text =
             }

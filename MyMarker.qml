@@ -23,7 +23,6 @@ MapQuickItem{
             anchors.fill: icon
 //            hoverEnabled: true
             onClicked: {
-                console.log("Entered")
                 var popupComponent = Qt.createComponent("PointInfoPopUp.qml")
                 var popup = popupComponent.createObject(marker)
                 popup.lat = lat
@@ -32,7 +31,6 @@ MapQuickItem{
                 popup.route_id = route_id
                 popup.thisIndexFromView = thisIndexFromView
                 function almostDel(lat, lon, n) {
-                    console.log('2 этап удаления')
                     delThisPoint(lat, lon, n)
                     marker.enabled = false
                     marker.visible = false

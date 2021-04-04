@@ -24,8 +24,12 @@ Window {
     property int thisRouteID: 0
     property int thisIndexFromView: 0
 
+    property double defaultLat: 55.75222
+    property double defaultLon: 37.61556
+
     function addMarker(latitude, longitude, pointNumber, fromBD)
     {
+
         var Component = Qt.createComponent("MyMarker.qml")
         var item = Component.createObject(mapRect, {coordinate: QtPositioning.coordinate(latitude, longitude)})
 
@@ -36,7 +40,7 @@ Window {
         item.thisIndexFromView = thisIndexFromView
 
         function finallyDelete(lat, lon, other_num) {
-            console.log('3 этап удаления')
+
             routeline.removeCoordinate(QtPositioning.coordinate(lat, lon))
 
             console.log('удалили: ', other_num)
@@ -60,20 +64,15 @@ Window {
         myMarkers.push(item)
 
         map.addMapItem(item)                                                   // (добавили метку на карту)
-        console.log("add fucking marker")
+        console.log("Добавили маркер")
         routeline.addCoordinate(QtPositioning.coordinate(latitude, longitude)) // (добавили линию)
 
         if (fromBD === false)
         {
-            console.log("Добавили новую метку через интерфейс (сейчас запишем в БД)")
             dbManager.add_point(pointNumber, latitude, longitude, thisRouteID)
             dbManager.updateAmountInRoutes(thisRouteID, pointNumber)
             routeModel.editAmountRouteInModel(thisIndexFromView, pointNumber)
         }
-
-
-        routeModel.justPrint(thisRouteID)
-        dbManager.justPrint(thisRouteID)
     }
 
     Rectangle {
@@ -89,12 +88,12 @@ Window {
             id: map
             anchors.fill: parent
             plugin: mapPlugin
-            center: QtPositioning.coordinate(55.75222, 37.61556) // координаты Москвы
+            center: QtPositioning.coordinate(defaultLat, defaultLon)   // по дефолту координаты Москвы
             zoomLevel:10
             MapPolyline {
                 id: routeline
-                line.width: 3
-                line.color: 'red'
+                line.width: 2
+                line.color: 'lightcoral'
                 path: []
             }
         }
@@ -118,46 +117,73 @@ Window {
             }
         }
     }
+    Rectangle {
+        id: info
+        x: 5
+        y: 5
+        anchors.leftMargin: 5
+        anchors.topMargin: 5
+        width: 133
+        height: 33
+        opacity: 0.3
+        color: "black"
+        radius: 4
+    }
+
     Text {
+        anchors.top: info.top
+        anchors.left: info.left
+        anchors.leftMargin: 3
         id: xName
-        text: 'x='
+        text: 'Latitude:    '
+        color: "white"
+        opacity: 1
     }
     Text {
         id: yName
         anchors.top: xName.bottom
-        text: 'y='
+        anchors.left: info.left
+        anchors.leftMargin: 3
+        text: 'Longitude: '
+        color: "white"
+        opacity: 1
     }
     Text {
         id: x
+        anchors.top: info.top
         anchors.left: xName.right
         text: map.toCoordinate(Qt.point(xPos,xPos)).latitude.toFixed(4)
+        color: "white"
+        opacity: 1
     }
     Text {
         id: y
         anchors.left: yName.right
         anchors.top: x.bottom
         text: map.toCoordinate(Qt.point(xPos,xPos)).longitude.toFixed(4)
+        color: "white"
+        opacity: 1
     }
-    Text {
-        id: click_xName
-        anchors.top: yName.bottom
-        text: 'clicked x='
-    }
-    Text {
-        id: click_yName
-        anchors.top: click_xName.bottom
-        text: 'clicked y='
-    }
-    Text {
-        id: click_x
-        anchors.left: click_xName.right
-        anchors.top: y.bottom
-        text: map.toCoordinate(Qt.point(click_xPos,click_yPos)).latitude.toFixed(4)
-    }
-    Text {
-        id: click_y
-        anchors.left: click_yName.right
-        anchors.top: click_x.bottom
-        text: map.toCoordinate(Qt.point(click_xPos,click_yPos)).longitude.toFixed(4)
-    }
+    //    Text {
+    //        id: click_xName
+    //        anchors.top: yName.bottom
+    //        text: 'clicked x='
+    //    }
+    //    Text {
+    //        id: click_yName
+    //        anchors.top: click_xName.bottom
+    //        text: 'clicked y='
+    //    }
+    //    Text {
+    //        id: click_x
+    //        anchors.left: click_xName.right
+    //        anchors.top: y.bottom
+    //        text: map.toCoordinate(Qt.point(click_xPos,click_yPos)).latitude.toFixed(4)
+    //    }
+    //    Text {
+    //        id: click_y
+    //        anchors.left: click_yName.right
+    //        anchors.top: click_x.bottom
+    //        text: map.toCoordinate(Qt.point(click_xPos,click_yPos)).longitude.toFixed(4)
+    //    }
 }
