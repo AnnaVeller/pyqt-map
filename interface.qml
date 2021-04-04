@@ -272,7 +272,11 @@ ApplicationWindow {
                 item.defaultLat = dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i)
                 item.defaultLon = dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i)
             }
-            item.addMarker(dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i), dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i), i, true)
+            if (i === amountOfPoints) {
+                item.addMarker(dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i), dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i), i, true, true)
+            } else {
+                item.addMarker(dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i), dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i), i, true, false)
+            }
 
             console.log("lat=", dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i), "lon=", dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i))
         }

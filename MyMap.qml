@@ -19,6 +19,8 @@ Window {
 
     property var myMarkers: []
 
+    property var finalMarker: NULL
+
     signal clicked(int xx, int yy)
 
     property int thisRouteID: 0
@@ -27,11 +29,23 @@ Window {
     property double defaultLat: 55.75222
     property double defaultLon: 37.61556
 
-    function addMarker(latitude, longitude, pointNumber, fromBD)
+    function addMarker(latitude, longitude, pointNumber, fromBD, last)
     {
 
         var Component = Qt.createComponent("MyMarker.qml")
         var item = Component.createObject(mapRect, {coordinate: QtPositioning.coordinate(latitude, longitude)})
+
+        if (last) {
+            item.m = "fin.gif"
+            if (!finalMarker) {
+                finalMarker = item
+            }
+            else
+            {
+                finalMarker.m = "marker3.png"
+                finalMarker = item
+            }
+        }
 
         item.lat = latitude
         item.lon = longitude
@@ -39,7 +53,7 @@ Window {
         item.route_id = thisRouteID
         item.thisIndexFromView = thisIndexFromView
 
-        function finallyDelete(lat, lon, other_num) {
+        function finallyDelete(lat, lon, other_num, lastWasDeleted) {
 
             routeline.removeCoordinate(QtPositioning.coordinate(lat, lon))
 
@@ -57,6 +71,11 @@ Window {
                 if (myMarkers[i].num > other_num) {
                     myMarkers[i].num = myMarkers[i].num - 1
                     console.log("myMarkers: i=", i, "myMarkers.num=", myMarkers[i].num)
+                }
+                if ((myMarkers[i].num === other_num-1) && (lastWasDeleted === true)) {
+                    console.log("поменяли финальную точку! myMarkers: i=", i, "myMarkers.num=", myMarkers[i].num)
+                    myMarkers[i].m = "fin.gif"
+                    finalMarker = myMarkers[i]
                 }
             }
         }
@@ -110,7 +129,7 @@ Window {
             onClicked: {
                 console.log('latitude = '+ (map.toCoordinate(Qt.point(mouse.x,mouse.y)).latitude),
                                                    'longitude = '+ (map.toCoordinate(Qt.point(mouse.x,mouse.y)).longitude));
-                root.addMarker(map.toCoordinate(Qt.point(mouse.x,mouse.y)).latitude, map.toCoordinate(Qt.point(mouse.x,mouse.y)).longitude, dbManager.getAmountOfPoints(thisRouteID)+1, false)
+                root.addMarker(map.toCoordinate(Qt.point(mouse.x,mouse.y)).latitude, map.toCoordinate(Qt.point(mouse.x,mouse.y)).longitude, dbManager.getAmountOfPoints(thisRouteID)+1, false, true)
 //                root.clicked(mouse.x, mouse.y)  // emit the parent's signal
                 click_xPos=mouse.x
                 click_yPos=mouse.y

@@ -10,13 +10,15 @@ MapQuickItem{
     property int num: 0
     property int route_id: 0
     property int thisIndexFromView: 0
-    signal delThisPoint(real lat, real lon, int n)
+    signal delThisPoint(real lat, real lon, int n, bool lastWasDeleted)
+
+    property string m: "marker3.png"
 
     anchorPoint.x: marker.width / 4 + 10
     anchorPoint.y: marker.height - 2
     sourceItem: Image{
         id: icon
-        source: "marker3.png"
+        source: m
         sourceSize.width: 40
         sourceSize.height: 40
         MouseArea {
@@ -31,7 +33,13 @@ MapQuickItem{
                 popup.route_id = route_id
                 popup.thisIndexFromView = thisIndexFromView
                 function almostDel(lat, lon, n) {
-                    delThisPoint(lat, lon, n)
+                    if (marker.m === "fin.gif") {
+                        delThisPoint(lat, lon, n, true)
+                    } else {
+                        delThisPoint(lat, lon, n, false)
+                    }
+
+//                    delThisPoint(lat, lon, n)
                     marker.enabled = false
                     marker.visible = false
                     popup.close()
