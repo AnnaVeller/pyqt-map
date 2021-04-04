@@ -19,7 +19,7 @@ Window {
 
     property var myMarkers: []
 
-    property var finalMarker: NULL
+    property var finalMarker: 0
 
     signal clicked(int xx, int yy)
 
