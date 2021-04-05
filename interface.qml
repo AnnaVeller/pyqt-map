@@ -38,9 +38,6 @@ ApplicationWindow {
                     radius: 4
                     Component.onCompleted: {
                         index_r_id.push({ind: index, r_id: route_id})
-                        console.log("добавили в index_r_id!")
-                        for (var i = 0; i < index_r_id.length; i++)
-                            console.log("index_r_id: i=", i, "index=", index_r_id[i].ind, "route_id=", index_r_id[i].r_id)
                     }
                     Row {
                         anchors.left: parent.left
@@ -58,7 +55,6 @@ ApplicationWindow {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: route_id
                                 color: "maroon"
-                                Component.onCompleted: console.log("width:", width, "height:", height)
                             }
                         }
                         Rectangle {
@@ -70,7 +66,6 @@ ApplicationWindow {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: name
                                 color: "maroon"
-                                Component.onCompleted: console.log("width:", width, "height:", height)
                             }
                         }
                         Rectangle {
@@ -82,7 +77,6 @@ ApplicationWindow {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: date
                                 color: "maroon"
-                                Component.onCompleted: console.log("width:", width, "height:", height)
                             }
                         }
                         Rectangle {
@@ -94,7 +88,6 @@ ApplicationWindow {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: amount
                                 color: "maroon"
-                                Component.onCompleted: console.log("width:", width, "height:", height)
                             }
                         }
                         Column {
@@ -129,8 +122,6 @@ ApplicationWindow {
                                 onClicked: {
                                     root.openMap(index)                    // нужно передать index!
                                     listExample.enabled = false
-                                    routeModel.justPrint(index)
-                                    dbManager.justPrint(index)
                                 }
                                 background: Rectangle {
                                     color: "lightblue"
@@ -189,7 +180,7 @@ ApplicationWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Добавить"
                     onClicked: {
-                        console.log("Кнопка add была нажата, имя:",nameField.text)
+                        console.log("Попытка добавить маршрут: ",nameField.text)
                         if (routeModel.isUniqueName(nameField.text)) {
                             routeModel.insertRoute(nameField.text)
                             console.log("Такого имени еще нет - добавили")
@@ -231,7 +222,6 @@ ApplicationWindow {
                             id: label1
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: "ID маршрута \n      из БД"
-                            Component.onCompleted: console.log("aa width:", width, "height:", height)
                         }
                     }
                     Rectangle {
@@ -242,7 +232,6 @@ ApplicationWindow {
                             id: label2
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: "Имя маршрута"
-                            Component.onCompleted: console.log("aa width:", width, "height:", height)
                         }
                     }
                     Rectangle {
@@ -253,7 +242,6 @@ ApplicationWindow {
                             id: label3
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: "Дата создания"
-                            Component.onCompleted: console.log("aa width:", width, "height:", height)
                         }
                     }
                     Rectangle {
@@ -264,7 +252,6 @@ ApplicationWindow {
                             id: label4
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: "Количество \n      точек"
-                            Component.onCompleted: console.log("aa width:", width, "height:", height)
                         }
                     }
                 }
@@ -281,7 +268,16 @@ ApplicationWindow {
         var amountOfPoints = dbManager.getAmountOfPoints(index_r_id[index].r_id)                 // route.amount = amountOfPoints
         console.log("Количество точек в бд =", amountOfPoints)
         for (var i = 1; i < amountOfPoints+1; i++) {
-            item.addMarker(dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i), dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i), i, true)
+            if (i === 1) {
+                item.defaultLat = dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i)
+                item.defaultLon = dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i)
+            }
+            if (i === amountOfPoints) {
+                item.addMarker(dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i), dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i), i, true, true)
+            } else {
+                item.addMarker(dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i), dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i), i, true, false)
+            }
+
             console.log("lat=", dbManager.getLatFromRouteByNumber(index_r_id[index].r_id, i), "lon=", dbManager.getLonFromRouteByNumber(index_r_id[index].r_id, i))
         }
         item.closing.connect(enebledBut)
